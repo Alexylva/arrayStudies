@@ -30,18 +30,9 @@ function select(transformFn, reducerFn, compareFn, ...values) {
             previousValue = reducedElement;
         }
     }
-    return JSON.stringify({selectedArray, selectedValue}, null, 1);
+    return {selectedArray, selectedValue};
 }
 
-console.log(`Maximum: ${
-    select(
-        transformSum, 
-        reducerCosine, 
-        (a,b) => a < b, 
-        ...argnums
-    )}`
-);
-//console.log(partition(transformDiff, ...argnums).sort((a,b) => a.length - b.length));
 
 function transformConcat(arr) {
     return Number.parseFloat(arr.join(''));
@@ -56,7 +47,6 @@ function transformSum(arr) {
 }
 
 function reducerSumTimesProduct(...arr) {
-//    if (arr.length === 1) return 0;
     return arr.reduce((prev, curr) => prev + curr) + arr.reduce((prev, curr) => prev * curr);
 }
 
@@ -65,17 +55,27 @@ function reducerSum(...arr) {
 }
 
 function reducerCosine(...arr) {
+    if (arr.length === 1) return Math.abs(Math.cos(arr[0]));
     return arr.reduce((a,b) => Math.abs(Math.cos(a+b)));
 }
 
 function toName(...arr) {
-    return arr.map(e => ((e % 26) + 9).toString(36));
+    return arr.map(e => ((e % 26) + 9).toString(36)).join('');
 }
 
 function toNumbers(str) {
     return Array.from(str).map(elem => Number.parseInt(elem, 36) - 9);
 }
-
+console.log(`Selection: ${
+    JSON.stringify(select(
+        transformSum, 
+        reducerCosine, 
+        (a,b) => a < b, 
+        ...argnums
+    ))}`
+);
+//console.log(partition(transformDiff, ...argnums).sort((a,b) => a.length - b.length));
+if(1)
 partition(transformConcat, ...argnums).forEach(
     elem => console.log(elem, '\t===>\t', toName(...elem))
 )
