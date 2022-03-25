@@ -1,4 +1,9 @@
-let argnums = [...process.argv.splice(2).map(elem => Number.parseFloat(elem))];
+let argnums = process.argv.splice(2);
+if (Number.isFinite(Number.parseFloat(argnums[0]))) {
+    argnums = [...argnums.map(elem => Number.parseFloat(elem))];
+} else {
+    argnums = Array.from(argnums.toString()).map(e => toNumbers(e)).flat();
+}
 
 function partition(transformFn, ...arr) {
     const pow = Math.pow(2, arr.length - 1);
@@ -46,6 +51,12 @@ function transformSum(arr) {
     return Number.parseFloat(arr.reduce((a, b) => Math.abs(a + b)));
 }
 
+function transformTimes(arr) {
+    return Number.parseFloat(arr.reduce((a, b) => Math.abs(a * b)));
+}
+
+
+
 function reducerSumTimesProduct(...arr) {
     return arr.reduce((prev, curr) => prev + curr) + arr.reduce((prev, curr) => prev * curr);
 }
@@ -59,23 +70,44 @@ function reducerCosine(...arr) {
     return arr.reduce((a,b) => Math.abs(Math.cos(a+b)));
 }
 
+function reducerTangent(...arr) {
+    if (arr.length === 1) return Math.abs(Math.tan(arr[0]));
+    return arr.reduce((a,b) => Math.abs(Math.tan(a+b)));
+}
+
+function reducerAprox(...arr) {
+    if (arr.length === 1) return Math.abs(Math.tan(arr[0]));
+    return arr.reduce((a,b) => Math.abs(166 - (a+b)));
+}
+
+function reducerLog(...arr) {
+    if (arr.length === 1) return Math.abs(Math.log(arr[0]));
+    return arr.reduce((a,b) => Math.abs(Math.log(a+b)));
+}
+
 function toName(...arr) {
-    return arr.map(e => ((e % 26) + 9).toString(36)).join('');
+    return arr.map(e => ((e+25) % 26 + 10).toString(36)).join('');
 }
 
 function toNumbers(str) {
     return Array.from(str).map(elem => Number.parseInt(elem, 36) - 9);
 }
-console.log(`Selection: ${
-    JSON.stringify(select(
-        transformSum, 
-        reducerCosine, 
-        (a,b) => a < b, 
-        ...argnums
-    ))}`
-);
+
+let selection = select(
+    transformTimes, 
+    reducerAprox, 
+    minimize, 
+    ...argnums
+)
+
+if(0)
+console.log(`Selection: ${JSON.stringify(selection)}, name: ${toName(...selection.selectedArray)}`);
 //console.log(partition(transformDiff, ...argnums).sort((a,b) => a.length - b.length));
 if(1)
 partition(transformConcat, ...argnums).forEach(
     elem => console.log(elem, '\t===>\t', toName(...elem))
 )
+
+function minimize(a,b) {
+    return Math.abs(a) < Math.abs(b);
+}
